@@ -8,49 +8,55 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.mehedi.platzi2205.R
+import com.mehedi.platzi2205.base.BaseFragment
 import com.mehedi.platzi2205.data.models.login.RequestLogin
 import com.mehedi.platzi2205.databinding.FragmentLoginBinding
+import com.mehedi.platzi2205.utils.Keys
+import com.mehedi.platzi2205.utils.PrefManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class LoginFragment : Fragment() {
-
-    lateinit var binding: FragmentLoginBinding
+class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::inflate) {
 
 
-    val viewModel: LoginViewModel by viewModels()
+    private val viewModel: LoginViewModel by viewModels()
+
+    @Inject
+    lateinit var prefManager: PrefManager
 
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-
-        binding = FragmentLoginBinding.inflate(inflater, container, false)
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         viewModel.loginResponse.observe(viewLifecycleOwner) {
 
             if (it.isSuccessful) {
                 binding.loading.visibility = View.GONE
 
+                prefManager.setPref(Keys.ACCESS_TOKEN, it.body()?.accessToken!!)
+                prefManager.setPref(Keys.REFRESH_TOKEN, it.body()?.refreshToken!!)
 
 
-                findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+
+
+                findNavController().navigate(R.id.action_loginFragment_to_profileFragment)
+              //  findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
 
             }
 
 
         }
 
+        binding.registerBtn.setOnClickListener {
 
-        return binding.root
-    }
+            findNavController().navigate(R.id.action_loginFragment_to_reagisterFragment)
+
+        }
 
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+
+
         binding.loginBtn.setOnClickListener {
             binding.loading.visibility = View.VISIBLE
 
@@ -59,7 +65,8 @@ class LoginFragment : Fragment() {
 
 
             // handleLogin(email, password)
-            handleLogin("john@mail.com", "changeme")
+          //  handleLogin("john@mail.com", "changeme")
+            handleLogin("user@gmail.com", "123456")
 
         }
 
